@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signup</title>
+</head>
+<body>
+  <div class="div1">
+    <h1 style="margin-left: 50px;">Signup</h1>
+  
+    <form action="/signup" method="post" onsubmit="return validateForm()">
+      <label for="name">Name</label><br>
+      <input type="text" id="name" name="name" ><br>
+      <span id="name-error" style="color: red;"></span><br><br>
+
+      <label for="email">Email</label><br>
+      <input type="text" id="email" name="email" ><br>
+      <span id="email-error" style="color: red;"></span><br><br>
+
+      <label for="password">Password</label><br>
+      <input type="password" id="password" name="password" ><br>
+      <span id="password-error" style="color: red;"></span><br><br>
+
+      <button type="submit">Signup</button>
+    </form>
+
+    <p>Already have an account? <a href="/login">Login</a></p>
+  </div>
+
+  <% if (signupSuccessful) { %> -->
+
+      <p style="margin-left: 550px; font-size: medium;">Signup successful! Go to <a href="/welcome">Welcome page</a></p>
+  <% } %> 
+  
+  
+  <script>
+    function validateForm() {
+      var name = document.getElementById("name").value;
+      var email = document.getElementById("email").value;
+      var password = document.getElementById("password").value;
+  
+      var nameError = document.getElementById("name-error");
+      var emailError = document.getElementById("email-error");
+      var passwordError = document.getElementById("password-error");
+  
+      nameError.innerHTML = "";
+      emailError.innerHTML = "";
+      passwordError.innerHTML = "";
+  
+      var isValid = true;
+  
+   
+      if (name.trim() === "") {
+        nameError.innerHTML = "Name is required.";
+        isValid = false;
+      } else {
+        
+        var nameRegex = /^[a-zA-Z ]+$/;
+        if (!nameRegex.test(name)) {
+          nameError.innerHTML = "Name should only contain letters";
+          isValid = false;
+        }
+      }
+  
+      if (email.trim() === "") {
+        emailError.innerHTML = "Email is required.";
+        isValid = false;
+      } else {
+        
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          emailError.innerHTML = "Invalid email format.";
+          isValid = false;
+        }
+      }
+  
+      if (password.trim() === "") {
+        passwordError.innerHTML = "Password is required.";
+        isValid = false;
+      } else {
+       
+        var passwordRegex = /^\d{6,}$/;
+         if (!passwordRegex.test(password)) {
+             passwordError.innerHTML = "Password must be six digits.";
+       isValid = false;
+      }
+      }
+  
+      return isValid;
+    }
+  </script>
+
+  
+
+
+
+  <style>
+     body{
+      background-color: rgb(50, 144, 182);
+    }
+    .div1 {
+     background-color: rgb(211, 211, 211);
+     width: 300px;
+     margin: auto;
+     display: flex;
+     flex-direction: column;
+     padding-left: 100px;
+     margin-top: 100px;
+     border-radius: 15px;
+     box-shadow: 0px 0px 15px;
+    }
+ 
+    input {
+     border: 1px solid gray;
+     border-radius: 5px;
+     outline: none;
+     height: 25px;
+     width: 200px;
+    }
+ 
+    label {
+     font-family: Georgia, 'Times New Roman', Times, serif;
+    }
+ 
+    button {
+     margin-left: 70px;
+     background-color: rgb(138, 138, 138);
+     border: none;
+     height: 25px;
+     border-radius: 3px;
+    }
+ 
+    a {
+     text-decoration: none;
+    }
+    span {
+      margin-left: 5px;
+     
+    }
+  </style>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

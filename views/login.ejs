@@ -1,0 +1,70 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+ 
+</head>
+<body>
+  <div id="div1">
+    <h1 style="margin-left: 25px;">Login Page</h1>
+
+    
+    <div class="error-message" id="error-message" ><%= errorMessage %></div>
+
+    <form action="/login" method="post">
+      <label for="email">Enter Your Email</label><br>
+      <input type="text" id="email" name="email" required><br><br>
+
+      <label for="password">Enter Password</label><br>
+      <input type="password" id="password" name="password" required><br><br>
+
+      <button type="submit" style="background-color: rgb(94, 95, 199); margin-left: 70px; border-radius: 3px; border: none; height: 20px; width: 55px;">Login</button>
+    </form>
+    <p>Don't have an account? <button style="border-radius: 3px; border: none; height: 25px;"><a href="/signup">Sign up</a></button></p>
+  </div>
+
+
+  <style>
+    body{
+      background-color: aquamarine;
+    }
+    #div1 {
+      background-color: rgb(161, 179, 179);
+      width: 300px;
+      height: 350px;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+      padding-left: 100px;
+      margin-top: 100px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 20px;
+    }
+
+    label {
+      font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    }
+
+    input {
+      height: 25px;
+      width: 200px;
+      border: 0.5px solid rgb(0, 0, 0);
+      border-radius: 5px;
+      outline: none;
+    }
+    p {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    a {
+      text-decoration: none;
+    }
+    .error-message {
+      color: red;
+      margin-top: 10px; 
+    }
+  </style>
+</body>
+</html>

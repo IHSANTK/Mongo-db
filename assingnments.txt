@@ -1,0 +1,374 @@
+1 .//Retrieve the names of all customers.
+
+products> db.Costomers.find({}, {Name: 1, _id: 0 })
+[
+  { Name: 'John Doe' },
+  { Name: 'Jane Smith' },
+  { Name: 'David Wang' },
+  { Name: 'Lisa Chen' }
+]
+2.//Retrieve the total number of orders placed.
+   products> db.Orders.find().count()
+   4
+
+3.//Retrieve the details of the order with OrderID 1003.
+products> db.Orders.findOne({ OrderID: 1003 })
+{
+  _id: ObjectId('65bc042a87c4affc9739b877'),
+  OrderID: 1003,
+  CustomerID: 3,
+  Total: 300
+}
+
+
+4.//Retrieve the names of customers who are from Beijing.
+products> db.Costomers.find({ City: 'Beijing' }, { Name: 1, _id: 0 } )
+[ { Name: 'David Wang' } ]
+
+
+
+5.//Retrieve the total price of all orders.
+db.Orders.aggregate([  { $group: { _id: null, totalprice: { $sum: "$Total" } } }])
+[ { _id: null, totalprice: 770 } ]
+
+6.//Retrieve the product names and their prices.
+db.Product.find({}, { ProductName: 1, Price: 1, _id: 0 })
+[
+  { ProductName: 'Laptop', Price: 1000 },
+  { ProductName: 'Smartphone', Price: 800 },
+  { ProductName: 'Tablet', Price: 500 },
+  { ProductName: 'TV', Price: 1500 }
+]
+
+7.//Retrieve the names of customers along with their city.
+ db.Costomers.find({}, { Name: 1, City: 1, _id: 0 })
+[
+  { Name: 'John Doe', City: 'New York' },
+  { Name: 'Jane Smith', City: 'London' },
+  { Name: 'David Wang', City: 'Beijing' },
+  { Name: 'Lisa Chen', City: 'Shanghai' }
+]
+
+8.//Retrieve the orders placed by John Doe (CustomerID 1).
+db.Orders.aggregate([{$lookup: { from: "Costomers", localField: "CustomerID",foreignField: "id", as: "customer"}},{$match:{"customer.Name": "John Doe"}}])
+[
+  {
+    _id: ObjectId('65bc042a87c4affc9739b875'),
+    OrderID: 100,
+    CustomerID: 1,
+    Total: 200,
+    customer: [
+      {
+        _id: ObjectId('65bbfe1fbc41bb5ceddf4a18'),
+        id: 1,
+        Name: 'John Doe',
+        City: 'New York'
+      }
+    ]
+  },
+  {
+    _id: ObjectId('65bc042a87c4affc9739b878'),
+    OrderID: 1004,
+    CustomerID: 1,
+    Total: 120,
+    customer: [
+      {
+        _id: ObjectId('65bbfe1fbc41bb5ceddf4a18'),
+        id: 1,
+        Name: 'John Doe',
+        City: 'New York'
+      }
+    ]
+  }
+]
+
+
+
+9.//Retrieve the customers who have placed orders
+db.Costomers.aggregate([{ $lookup: {from: "Orders", localField: "id",foreignField: "CustomerID",as: "orders" }},  { $match: {  "orders": { $ne: [] }}}])
+[
+  {
+    _id: ObjectId('65bbfe1fbc41bb5ceddf4a18'),
+    id: 1,
+    Name: 'John Doe',
+    City: 'New York',
+    orders: [
+      {
+        _id: ObjectId('65bc042a87c4affc9739b875'),
+        OrderID: 100,
+        CustomerID: 1,
+        Total: 200
+      },
+      {
+        _id: ObjectId('65bc042a87c4affc9739b878'),
+        OrderID: 1004,
+        CustomerID: 1,
+        Total: 120
+      }
+    ]
+  },
+  {
+    _id: ObjectId('65bbfe1fbc41bb5ceddf4a19'),
+    id: 2,
+    Name: 'Jane Smith',
+    City: 'London',
+    orders: [
+      {
+        _id: ObjectId('65bc042a87c4affc9739b876'),
+        OrderID: 1002,
+        CustomerID: 2,
+        Total: 150
+      }
+    ]
+  },
+  {
+    _id: ObjectId('65bbfe1fbc41bb5ceddf4a1a'),
+    id: 3,
+    Name: 'David Wang',
+    City: 'Beijing',
+    orders: [
+      {
+        _id: ObjectId('65bc042a87c4affc9739b877'),
+        OrderID: 1003,
+        CustomerID: 3,
+        Total: 300
+      }
+    ]
+  }
+]
+
+10.//Retrieve the orders placed by customers from Shanghai.
+db.Costomers.aggregate([{$lookup: {from:"Orders",localField: "id",foreignField: "CustomerID",as:"orders"}},{$unwind:{path:"$orders"}},{$match:{City:"London"}}])
+[
+  {
+    _id: ObjectId('65bbfe1fbc41bb5ceddf4a19'),
+    id: 2,
+    Name: 'Jane Smith',
+    City: 'London',
+    orders: {
+      _id: ObjectId('65bc042a87c4affc9739b876'),
+      OrderID: 1002,
+      CustomerID: 2,
+      Total: 150
+    }
+  }
+]
+
+11.//Retrieve the highest price from the Products table.
+db.Product.find().sort({ Price: -1 }).limit(1)
+[
+  {
+    _id: ObjectId('65bc071787c4affc9739b87c'),
+    ProductID: 4,
+    ProductName: 'TV',
+    Price: 1500
+  }
+]
+
+12.//Retrieve the average price of all products.
+db.Product.aggregate([{ $group: { _id: null, average: { $avg: "$Price" } } }] )
+[ { _id: null, average: 950 } ]
+
+13.//Retrieve the details of customers who have placed orders.
+ db.Costomers.aggregate([ { $match: { id: { $in: db.Orders.distinct("CustomerID") } } }])
+[
+  {
+    _id: ObjectId('65bbfe1fbc41bb5ceddf4a18'),
+    id: 1,
+    Name: 'John Doe',
+    City: 'New York'
+  },
+  {
+    _id: ObjectId('65bbfe1fbc41bb5ceddf4a19'),
+    id: 2,
+    Name: 'Jane Smith',
+    City: 'London'
+  },
+  {
+    _id: ObjectId('65bbfe1fbc41bb5ceddf4a1a'),
+    id: 3,
+    Name: 'David Wang',
+    City: 'Beijing'
+  }
+]
+
+14.//Retrieve the names of customers who have not placed any orders.
+db.Costomers.aggregate([ { $match: { id: { $in: db.Orders.distinct("CustomerID") } } },{ $project: { Name: 1, _id: 0 } }])
+[
+  { Name: 'John Doe' },
+  { Name: 'Jane Smith' },
+  { Name: 'David Wang' }
+]
+
+15.//Retrieve the customer names along with the total order value.
+ db.Costomers.aggregate([{$lookup:{from:"Orders",localField: "id", foreignField:"CustomerID" ,as:"orders"}},{$project:{_id:false, Name:1,Totalvalue:{$sum:"$orders.Total"}}}])
+[
+  { Name: 'John Doe', Totalvalue: 320 },
+  { Name: 'Jane Smith', Totalvalue: 0 },
+  { Name: 'David Wang', Totalvalue: 300 },
+  { Name: 'Lisa Chen', Totalvalue: 0 },
+  { Name: 'Emma Wilson', Totalvalue: 0 }
+]
+
+
+16.//Retrieve the orders placed in descending order of their total value.
+ db.Orders.find({}).sort({ Total: -1 })
+[
+  {
+    _id: ObjectId('65bc042a87c4affc9739b877'),
+    OrderID: 1003,
+    CustomerID: 3,
+    Total: 300
+  },
+  {
+    _id: ObjectId('65bc042a87c4affc9739b875'),
+    OrderID: 100,
+    CustomerID: 1,
+    Total: 200
+  },
+  {
+    _id: ObjectId('65bc042a87c4affc9739b876'),
+    OrderID: 1002,
+    CustomerID: 2,
+    Total: 150
+  },
+  {
+    _id: ObjectId('65bc042a87c4affc9739b878'),
+    OrderID: 1004,
+    CustomerID: 1,
+    Total: 120
+  }
+]
+
+17.//Retrieve the product names along with their prices, sorted by price in descending order.
+ db.Product.find({}, { ProductName: 1, Price: 1, _id: 0 }).sort({ Price: -1 })
+[
+  { ProductName: 'TV', Price: 1500 },
+  { ProductName: 'Laptop', Price: 1000 },
+  { ProductName: 'Smartphone', Price: 800 },
+  { ProductName: 'Tablet', Price: 500 }
+]
+
+
+
+18.//Retrieve the names of customers along with the number of orders they have placed.
+db.Orders.aggregate([{ $group: { _id: "$CustomerID", numberOfOrders: { $sum: 1 } } },{ $lookup: {from: "Costomers",localField: "_id",foreignField: "id",as: "customerDetails"}},{ $unwind: "$customerDetails" },{ $project: { CustomerName: "$customerDetails.Name", numberOfOrders: 1, _id: 0 } }])
+[
+  { numberOfOrders: 1, CustomerName: 'Jane Smith' },
+  { numberOfOrders: 1, CustomerName: 'David Wang' },
+  { numberOfOrders: 2, CustomerName: 'John Doe' }
+]
+
+
+
+19.//Retrieve the orders placed by customers from London.
+db.Costomers.aggregate([ { $match: { City: "London" } },
+...   { $lookup: { from: "Orders", localField: "id", foreignField: "CustomerID", as: "orders" } },{ $unwind: "$orders" }])
+[
+  {
+    _id: ObjectId('65bbfe1fbc41bb5ceddf4a19'),
+    id: 2,
+    Name: 'Jane Smith',
+    City: 'London',
+    orders: {
+      _id: ObjectId('65bc042a87c4affc9739b876'),
+      OrderID: 1002,
+      CustomerID: 2,
+      Total: 150
+    }
+  }
+]
+
+20.//Insert a new customer with ID 5, name 'Emma Wilson', and city 'Paris'.
+ db.Costomers.insertOne({ id: 5, Name: "Emma Wilson", City: "Paris" })
+{
+  acknowledged: true,
+  insertedId: ObjectId('65be506d23f959f973c2f2c0')
+}
+
+21.//Update the city of the customer with ID 3 to 'Tokyo'.
+db.Costomers.updateOne({ id: 3 }, { $set: { City: "Tokyo" } })
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+
+22.//Update the price of the product with ID 2 to 900.
+ db.Product.updateOne({ ProductID: 2 }, { $set: { Price: 900 } })
+{
+  acknowledged: true,
+  //insertedId: null,
+  //matchedCount: 1,
+  //modifiedCount: 1,
+ // upsertedCount: 0
+}
+
+23.//Delete the order with OrderID 1002.
+db.Orders.deleteOne({ OrderID: 1002 })
+{ acknowledged: true, deletedCount: 1 }
+
+24.//Retrieve the names of customers and their cities using aliases.
+db.Costomers.aggregate([{ $project: { name: "$Name", city: "$City", _id: 0 } }])
+[
+  { name: 'John Doe', city: 'New York' },
+  { name: 'Jane Smith', city: 'London' },
+  { name: 'David Wang', city: 'Tokyo' },
+  { name: 'Lisa Chen', city: 'Shanghai' },
+  { name: 'Emma Wilson', city: 'Paris' }
+]
+
+25.//Retrieve the customer names along with their total order value, sorted by order value in descending order.
+db.Costomers.aggregate([{$lookup:{from:"Orders",localField: "id", foreignField:"CustomerID" ,as:"orders"}},{$project:{_id:false, Name:1,Totalvalue:{$sum:"$orders.Total"}}},{$sort:{Totalvalue:-1}}])
+[
+  { Name: 'John Doe', Totalvalue: 320 },
+  { Name: 'David Wang', Totalvalue: 300 },
+  { Name: 'Jane Smith', Totalvalue: 0 },
+  { Name: 'Lisa Chen', Totalvalue: 0 },
+  { Name: 'Emma Wilson', Totalvalue: 0 }
+]
+
+
+26.//Retrieve the customer names along with the number of orders they have placed, sorted by the number of orders in ascending order.
+db.Costomers.aggregate([{$lookup:{from:"Orders",localField: "id", foreignField:"CustomerID" ,as:"orders"}},{$project:{_id:false, Name:1,Totalvalue:{$sum:"$orders.Total"}}},{$sort:{Totalvalue:1}}])
+[
+  { Name: 'Jane Smith', Totalvalue: 0 },
+  { Name: 'Lisa Chen', Totalvalue: 0 },
+  { Name: 'Emma Wilson', Totalvalue: 0 },
+  { Name: 'David Wang', Totalvalue: 300 },
+  { Name: 'John Doe', Totalvalue: 320 }
+]
+
+27.//Retrieve the customer names along with the average order value, sorted by the average order value in descending order.
+ db.Costomers.aggregate([{$lookup:{from:"Orders",localField: "id", foreignField:"CustomerID" ,as:"orders"}},{$project:{_id:false, Name:1,Totalvalue:{$avg:"$orders.Total"}}},{$sort:{Totalvalue:-1}}])
+[
+  { Name: 'David Wang', Totalvalue: 300 },
+  { Name: 'John Doe', Totalvalue: 160 },
+  { Name: 'Jane Smith', Totalvalue: null },
+  { Name: 'Lisa Chen', Totalvalue: null },
+  { Name: 'Emma Wilson', Totalvalue: null }
+]
+
+
+28.//Calculate the total price of all orders placed by customers from Beijing.
+db.Costomers.aggregate([{ $match: { City: "Tokyo" } }, { $lookup: { from: "Orders", localField: "id", foreignField: "CustomerID", as: "orders" } },{ $unwind: "$orders"},{ $group: { _id: null, totalOrderValue: { $sum: "$orders.Total" } } }])
+[ { _id: null, totalOrderValue: 300 } ]
+
+
+
+29.//Calculate the average price of products in the Tablet category.
+db.Product.aggregate([{$match:{ProductName:"Tablet"}},{$group:{_id:null,averagevalue:{$sum:"price"}}}])
+[ { _id: null, averagevalue: 0 } ]
+
+30.//Calculate the total revenue generated by each customer.
+
+ db.Costomers.aggregate([{$lookup:{from:"Orders",localField: "id", foreignField:"CustomerID" ,as:"orders"}},{$project:{_id:false, Name:1,Totalvalue:{$sum:"$orders.Total"}}}])
+[
+  { Name: 'John Doe', Totalvalue: 320 },
+  { Name: 'Jane Smith', Totalvalue: 0 },
+  { Name: 'David Wang', Totalvalue: 300 },
+  { Name: 'Lisa Chen', Totalvalue: 0 },
+  { Name: 'Emma Wilson', Totalvalue: 0 }
+]
